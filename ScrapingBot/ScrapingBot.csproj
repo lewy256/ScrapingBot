@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AzureFunctionsVersion>v4</AzureFunctionsVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Data.Tables" Version="12.9.1" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.65" />
+    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="2.13.6" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.4.1" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.47.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="host.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+  <Target Name="FixPlaywrightCopyAfterBuild" AfterTargets="Build">
+    <ItemGroup>
+        <_BuildCopyItems Include="$(OutDir).playwright\**" />
+    </ItemGroup>
+    <Message Text="[Fix] Copying files to the nested bin folder of the azure function... $(OutDir)bin" Importance="high" />
+    <Copy SourceFiles="@(_BuildCopyItems)" DestinationFiles="@(_BuildCopyItems->'$(OutDir)bin\.playwright\%(RecursiveDir)%(Filename)%(Extension)')" />
+   </Target>
+    
+
+   <Target Name="FixPlaywrightCopyAfterPublish" AfterTargets="Publish">
+     <ItemGroup>
+         <_BuildCopyItems Include="$(PublishDir).playwright\**" />
+     </ItemGroup>
+     <Message Text="[Fix] Copying files to the nested bin folder of the azure function for publishing... $(PublishDir)bin" Importance="high" />
+     <Copy SourceFiles="@(_BuildCopyItems)" DestinationFiles="@(_BuildCopyItems->'$(PublishDir)bin\.playwright\%(RecursiveDir)%(Filename)%(Extension)')" />
+   </Target>
+</Project>
